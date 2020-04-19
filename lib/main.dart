@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
-import 'package:vector_math/vector_math_64.dart' as vector;
+
 
 
 
@@ -27,6 +27,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   ArCoreController arCoreController;
+
   var objName = 0;
   final textController = TextEditingController();
   
@@ -48,12 +49,26 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void onTapHandler(String name) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) =>
-          AlertDialog(content: Text('This is $name')),
-    );
-  }
+    
+    Widget delButton = FlatButton(
+    child: Text("DELETE"),
+    onPressed: () { 
+      arCoreController.removeNode(nodeName: name);
+    },
+  );
+
+  showDialog<void>(
+    context: context,
+    builder: (BuildContext context) =>
+        AlertDialog(
+          title: Text("Anchor details"),
+          content: Text('ID:  $name'),
+          actions: [
+            delButton,
+          ],
+        ),
+  );
+}
 
   _onPlaneTap(List<ArCoreHitTestResult> hits) => _onHitDetected(hits.first);
 
@@ -64,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
         color: Colors.purple);
     final sphere = ArCoreSphere(
       materials: [material],
-      radius: 0.2,
+      radius: 0.1,
     );
 
     this.objName = this.objName + 1;
