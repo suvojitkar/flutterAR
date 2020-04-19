@@ -27,19 +27,55 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   ArCoreController arCoreController;
+  var objName = 0;
+  final textController = TextEditingController();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Suvojitar"),
+      ),
+      body: ArCoreView(onArCoreViewCreated: _onArCoreViewCreated, enableTapRecognizer: true),
+    );
+  }
 
-  void _addSphere(ArCoreController controller) {
+
+  void _onArCoreViewCreated(ArCoreController controller) {
+    arCoreController = controller;
+    arCoreController.onNodeTap = (name) => onTapHandler(name);
+    controller.onPlaneTap = _onPlaneTap;
+  }
+
+  void onTapHandler(String name) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) =>
+          AlertDialog(content: Text('This is $name')),
+    );
+  }
+
+  _onPlaneTap(List<ArCoreHitTestResult> hits) => _onHitDetected(hits.first);
+
+
+  _onHitDetected(ArCoreHitTestResult plane) {
+    
     final material = ArCoreMaterial(
         color: Colors.purple);
     final sphere = ArCoreSphere(
       materials: [material],
       radius: 0.2,
     );
-    final node = ArCoreNode(
-      shape: sphere,
-      position: vector.Vector3(0, 0, -1),
+
+    this.objName = this.objName + 1;
+    arCoreController.addArCoreNodeWithAnchor(
+      ArCoreNode(
+        name: this.objName.toString(),
+        shape: sphere,
+        position: plane.pose.translation,
+        rotation: plane.pose.rotation,
+      ),
     );
-    controller.addArCoreNode(node);
   }
 
   @override
@@ -48,18 +84,4 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  void _onArCoreViewCreated(ArCoreController controller) {
-    arCoreController = controller;
-    _addSphere(arCoreController);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Suvojitar"),
-      ),
-      body: ArCoreView(onArCoreViewCreated: _onArCoreViewCreated),
-    );
-  }
 }
